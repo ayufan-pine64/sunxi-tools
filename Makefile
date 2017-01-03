@@ -135,7 +135,8 @@ sunxi-nand-part: nand-part-main.c nand-part.c nand-part-a10.h nand-part-a20.h
 	$(CC) $(HOST_CFLAGS) -c -o nand-part-main.o nand-part-main.c
 	$(CC) $(HOST_CFLAGS) -c -o nand-part-a10.o nand-part.c -D A10
 	$(CC) $(HOST_CFLAGS) -c -o nand-part-a20.o nand-part.c -D A20
-	$(CC) $(LDFLAGS) -o $@ nand-part-main.o nand-part-a10.o nand-part-a20.o $(LIBS)
+	$(CC) $(HOST_CFLAGS) -c -o nand-part-a64.o nand-part.c -D A64
+	$(CC) $(LDFLAGS) -o $@ nand-part-main.o nand-part-a10.o nand-part-a20.o nand-part-a64.o $(LIBS)
 
 sunxi-%: %.c
 	$(CC) $(HOST_CFLAGS) $(LDFLAGS) -o $@ $(filter %.c,$^) $(LIBS)

@@ -176,7 +176,7 @@ void *load_file(const char *name, size_t *size)
 		perror("Failed to open input file");
 		exit(1);
 	}
-	
+
 	while (true) {
 		size_t len = bufsize - offset;
 		size_t n = fread(buf+offset, 1, len, in);
@@ -190,7 +190,7 @@ void *load_file(const char *name, size_t *size)
 			exit(1);
 		}
 	}
-	if (size) 
+	if (size)
 		*size = offset;
 	if (in != stdin)
 		fclose(in);
@@ -706,6 +706,7 @@ void aw_fel_write_and_execute_spl(feldev_handle **devp, uint8_t *buf, size_t len
  */
 void aw_fel_write_uboot_image(feldev_handle *dev, uint8_t *buf, size_t len)
 {
+    printf("aw_fel_write_uboot_image\n");
 	if (len <= HEADER_SIZE)
 		return; /* Insufficient size (no actual data), just bail out */
 
@@ -771,6 +772,7 @@ void aw_fel_process_spl_and_uboot(feldev_handle **devp, const char *filename)
 	/* write and execute the SPL from the buffer */
 	aw_fel_write_and_execute_spl(devp, buf, size);
 	/* check for optional main U-Boot binary (and transfer it, if applicable) */
+  printf("SPL size: %d\n", size);
 	if (size > SPL_LEN_LIMIT)
 		aw_fel_write_uboot_image(*devp, buf + SPL_LEN_LIMIT, size - SPL_LEN_LIMIT);
 	free(buf);

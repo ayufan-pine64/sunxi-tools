@@ -22,16 +22,18 @@
 #include <stdio.h>
 #include <string.h>
 #include <strings.h>
+#include <errno.h>
 #include <fcntl.h>
 #include "nand-common.h"
-#include "common.h"
+
+int checkmbrs_a64(int fd);
+int nand_part_a64(int argc, char **argv, const char *cmd, int fd, int force);
 
 void usage(const char *cmd)
 {
-	puts("sunxi-nand-part " VERSION "\n");
-	printf("usage: %s [-f a10|a20] nand-device\n", cmd);
+	printf("usage: %s [-f a64] nand-device\n", cmd);
 	printf("       %s nand-device 'name2 len2 [usertype2]' ['name3 len3 [usertype3]'] ...\n", cmd);
-	printf("       %s [-f a10|a20] nand-device start1 'name1 len1 [usertype1]' ['name2 len2 [usertype2]'] ...\n", cmd);
+	printf("       %s [-f a64] nand-device start1 'name1 len1 [usertype1]' ['name2 len2 [usertype2]'] ...\n", cmd);
 }
 
 typedef struct tag_CRC32_DATA
@@ -82,10 +84,8 @@ int main (int argc, char **argv)
 
 	if (argc > 1) {
 		if (!strcmp(argv[0], "-f")) {
-			if (!strcasecmp(argv[1], "a10"))
-				force = 10;
-			else if (!strcasecmp(argv[1], "a20"))
-				force = 20;
+			if (!strcasecmp(argv[1], "a64"))
+				force = 64;
 			else {
 				usage(cmd);
 				return -1;
@@ -102,16 +102,16 @@ int main (int argc, char **argv)
 	}
 	fd = open(nand, O_RDWR);
 	if (fd < 0) {
+    fprintf(stderr, "failed to open %s: %s\n", nand, strerror(errno));
 		usage(cmd);
 		return -2;
 	}
-	if (force == 10)
-		return nand_part_a10 (argc, argv, cmd, fd, force);
-	if (force == 20)
-		return nand_part_a20 (argc, argv, cmd, fd, force);
 
-	if (checkmbrs_a10(fd))
-		return nand_part_a10 (argc, argv, cmd, fd, force);
-	if (checkmbrs_a20(fd))
-		return nand_part_a20 (argc, argv, cmd, fd, force);
+	if (force == 64)
+		return nand_part_a64 (argc, argv, cmd, fd, force);
+
+	if (checkmbrs_a64(fd))
+		return nand_part_a64 (argc, argv, cmd, fd, force);
+
+  return -1;
 }
