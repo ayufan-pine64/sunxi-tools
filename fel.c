@@ -33,6 +33,8 @@ static bool verbose = false; /* If set, makes the 'fel' tool more talkative */
 static uint32_t uboot_entry = 0; /* entry point (address) of U-Boot */
 static uint32_t uboot_size  = 0; /* size of U-Boot binary */
 
+static int busnum = -1, devnum = -1;
+
 /* printf-style output, but only if "verbose" flag is active */
 #define pr_info(...) \
 	do { if (verbose) printf(__VA_ARGS__); } while (0);
@@ -554,8 +556,9 @@ void aw_restore_and_enable_mmu(feldev_handle *dev,
  */
 #define SPL_LEN_LIMIT 0x8000
 
-void aw_fel_write_and_execute_spl(feldev_handle *dev, uint8_t *buf, size_t len)
+void aw_fel_write_and_execute_spl(feldev_handle **devp, uint8_t *buf, size_t len)
 {
+	feldev_handle *dev = *devp;
 	soc_info_t *soc_info = dev->soc_info;
 	sram_swap_buffers *swap_buffers;
 	char header_signature[9] = { 0 };
@@ -677,8 +680,13 @@ void aw_fel_write_and_execute_spl(feldev_handle *dev, uint8_t *buf, size_t len)
 	free(thunk_buf);
 
 	/* TODO: Try to find and fix the bug, which needs this workaround */
-	struct timespec req = { .tv_nsec = 250000000 }; /* 250ms */
+	struct timespec req = { .tv_sec = 1 }; /* 1s */
 	nanosleep(&req, NULL);
+
+	printf("=> Reconnecting...\n");
+	feldev_close(dev);
+	dev = feldev_open(busnum, devnum, AW_USB_VENDOR_ID, AW_USB_PRODUCT_ID);
+	*devp = dev;
 
 	/* Read back the result and check if everything was fine */
 	aw_fel_read(dev, soc_info->spl_addr + 4, header_signature, 8);
@@ -755,16 +763,16 @@ void aw_fel_write_uboot_image(feldev_handle *dev, uint8_t *buf, size_t len)
 /*
  * This function handles the common part of both "spl" and "uboot" commands.
  */
-void aw_fel_process_spl_and_uboot(feldev_handle *dev, const char *filename)
+void aw_fel_process_spl_and_uboot(feldev_handle **devp, const char *filename)
 {
 	/* load file into memory buffer */
 	size_t size;
 	uint8_t *buf = load_file(filename, &size);
 	/* write and execute the SPL from the buffer */
-	aw_fel_write_and_execute_spl(dev, buf, size);
+	aw_fel_write_and_execute_spl(devp, buf, size);
 	/* check for optional main U-Boot binary (and transfer it, if applicable) */
 	if (size > SPL_LEN_LIMIT)
-		aw_fel_write_uboot_image(dev, buf + SPL_LEN_LIMIT, size - SPL_LEN_LIMIT);
+		aw_fel_write_uboot_image(*devp, buf + SPL_LEN_LIMIT, size - SPL_LEN_LIMIT);
 	free(buf);
 }
 
@@ -970,7 +978,6 @@ int main(int argc, char **argv)
 	bool pflag_active = false; /* -p switch, causing "write" to output progress */
 	bool device_list = false; /* -l switch, prints device list and exits */
 	feldev_handle *handle;
-	int busnum = -1, devnum = -1;
 	char *sid_arg = NULL;
 
 	if (argc <= 1) {
@@ -1155,10 +1162,10 @@ int main(int argc, char **argv)
 			aw_fel_fill(handle, strtoul(argv[2], NULL, 0), strtoul(argv[3], NULL, 0), (unsigned char)strtoul(argv[4], NULL, 0));
 			skip=4;
 		} else if (strcmp(argv[1], "spl") == 0 && argc > 2) {
-			aw_fel_process_spl_and_uboot(handle, argv[2]);
+			aw_fel_process_spl_and_uboot(&handle, argv[2]);
 			skip=2;
 		} else if (strcmp(argv[1], "uboot") == 0 && argc > 2) {
-			aw_fel_process_spl_and_uboot(handle, argv[2]);
+			aw_fel_process_spl_and_uboot(&handle, argv[2]);
 			uboot_autostart = (uboot_entry > 0 && uboot_size > 0);
 			if (!uboot_autostart)
 				printf("Warning: \"uboot\" command failed to detect image! Can't execute U-Boot.\n");
