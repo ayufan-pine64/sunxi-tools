@@ -585,8 +585,8 @@ void aw_fel_write_and_execute_spl(feldev_handle **devp, uint8_t *buf, size_t len
 	for (i = 0; i < len / 4; i++)
 		spl_checksum -= le32toh(buf32[i]);
 
-	if (spl_checksum != 0)
-		pr_fatal("SPL: checksum check failed\n");
+	//if (spl_checksum != 0)
+	//	pr_fatal("SPL: checksum check failed\n");
 
 	if (soc_info->needs_l2en) {
 		pr_info("Enabling the L2 cache\n");
@@ -678,6 +678,7 @@ void aw_fel_write_and_execute_spl(feldev_handle **devp, uint8_t *buf, size_t len
 	pr_info(" done.\n");
 
 	free(thunk_buf);
+  return;
 
 	/* TODO: Try to find and fix the bug, which needs this workaround */
 	struct timespec req = { .tv_sec = 1 }; /* 1s */
@@ -772,7 +773,6 @@ void aw_fel_process_spl_and_uboot(feldev_handle **devp, const char *filename)
 	/* write and execute the SPL from the buffer */
 	aw_fel_write_and_execute_spl(devp, buf, size);
 	/* check for optional main U-Boot binary (and transfer it, if applicable) */
-  printf("SPL size: %d\n", size);
 	if (size > SPL_LEN_LIMIT)
 		aw_fel_write_uboot_image(*devp, buf + SPL_LEN_LIMIT, size - SPL_LEN_LIMIT);
 	free(buf);
@@ -1088,6 +1088,8 @@ int main(int argc, char **argv)
 	 * the first one matching the given USB vendor/procduct ID.
 	 */
 	handle = feldev_open(busnum, devnum, AW_USB_VENDOR_ID, AW_USB_PRODUCT_ID);
+
+  printf("Connected.\n");
 
 	/* Handle command-style arguments, in order of appearance */
 	while (argc > 1 ) {
