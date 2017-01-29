@@ -197,16 +197,16 @@ void print_boot_dram_para(boot_dram_para_t *dram)
   int i;
 	pprintf(&dram->dram_clk,	"DRAM clk  : %d\n", dram->dram_clk);
 	pprintf(&dram->dram_type,	"DRAM type : %d\n", dram->dram_type);
-	pprintf(&dram->dram_zq,		"DRAM zq   : %d\n", dram->dram_zq);
+	pprintf(&dram->dram_zq,		"DRAM zq   : 0x%x\n", dram->dram_zq);
 	pprintf(&dram->dram_odt_en,	"DRAM odt  : 0x%x\n", dram->dram_odt_en);
   for(i = 1; i <= 2; ++i) {
-    pprintf(&dram->dram_para[i-1],	"DRAM para%d : %08x\n", i, dram->dram_para[i-1]);
+    pprintf(&dram->dram_para[i-1],	"DRAM para%d : 0x%x\n", i, dram->dram_para[i-1]);
   }
   for(i = 0; i < 4; ++i) {
-    pprintf(&dram->dram_mr[i],	"DRAM mr%d : %08x\n", i, dram->dram_mr[i]);
+    pprintf(&dram->dram_mr[i],	"DRAM mr%d : 0x%x\n", i, dram->dram_mr[i]);
   }
   for(i = 0; i < 14; ++i) {
-    pprintf(&dram->dram_tpr[i],	"DRAM tpr%d : %08x\n", i, dram->dram_tpr[i]);
+    pprintf(&dram->dram_tpr[i],	"DRAM tpr%d : 0x%x\n", i, dram->dram_tpr[i]);
   }
 }
 
