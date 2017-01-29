@@ -55,26 +55,18 @@ typedef struct brom_file_head
 } brom_file_head_t;
 
 typedef struct _boot_dram_para_t {
-    __u32 dram_baseaddr;
-    __u32 dram_clk;
-    __u32 dram_type;
-    __u32 dram_rank_num;
-    __u32 dram_chip_density;
-    __u32 dram_io_width;
-    __u32 dram_bus_width;
-    __u32 dram_cas;
-    __u32 dram_zq;
-    __u32 dram_odt_en;
-    __u32 dram_size;
-    __u32 dram_tpr0;
-    __u32 dram_tpr1;
-    __u32 dram_tpr2;
-    __u32 dram_tpr3;
-    __u32 dram_tpr4;
-    __u32 dram_tpr5;
-    __u32 dram_emr1;
-    __u32 dram_emr2;
-    __u32 dram_emr3;
+  //normal configuration
+  unsigned int        dram_clk;
+  unsigned int        dram_type;		//dram_type			DDR2: 2				DDR3: 3				LPDDR2: 6	DDR3L: 31
+  unsigned int        dram_zq;
+  unsigned int		    dram_odt_en;
+
+  //control configuration
+  unsigned int		dram_para[2];
+
+  //timing configuration
+  unsigned int		dram_mr[4];
+  unsigned int		dram_tpr[14];
 } boot_dram_para_t;
 
 typedef struct _normal_gpio_cfg {
@@ -198,26 +190,20 @@ void print_boot_file_head(boot_file_head_t *hdr)
 
 void print_boot_dram_para(boot_dram_para_t *dram)
 {
-	pprintf(&dram->dram_baseaddr,	"DRAM base : %p\n", (void *)(uintptr_t)dram->dram_baseaddr);
+  int i;
 	pprintf(&dram->dram_clk,	"DRAM clk  : %d\n", dram->dram_clk);
 	pprintf(&dram->dram_type,	"DRAM type : %d\n", dram->dram_type);
-	pprintf(&dram->dram_rank_num,	"DRAM rank : %d\n", dram->dram_rank_num);
-	pprintf(&dram->dram_chip_density,"DRAM den  : %d\n", dram->dram_chip_density);
-	pprintf(&dram->dram_io_width,	"DRAM iow  : %d\n", dram->dram_io_width);
-	pprintf(&dram->dram_bus_width,	"DRAM busw : %d\n", dram->dram_bus_width);
-	pprintf(&dram->dram_cas,	"DRAM cas  : %d\n", dram->dram_cas);
 	pprintf(&dram->dram_zq,		"DRAM zq   : %d\n", dram->dram_zq);
 	pprintf(&dram->dram_odt_en,	"DRAM odt  : 0x%x\n", dram->dram_odt_en);
-	pprintf(&dram->dram_size,	"DRAM size : %d\n", dram->dram_size);
-	pprintf(&dram->dram_tpr0,	"DRAM tpr0 : 0x%x\n", dram->dram_tpr0);
-	pprintf(&dram->dram_tpr1,	"DRAM tpr1 : 0x%x\n", dram->dram_tpr1);
-	pprintf(&dram->dram_tpr2,	"DRAM tpr2 : 0x%x\n", dram->dram_tpr2);
-	pprintf(&dram->dram_tpr3,	"DRAM tpr3 : 0x%x\n", dram->dram_tpr3);
-	pprintf(&dram->dram_tpr4,	"DRAM tpr4 : 0x%x\n", dram->dram_tpr4);
-	pprintf(&dram->dram_tpr5,	"DRAM tpr5 : 0x%x\n", dram->dram_tpr5);
-	pprintf(&dram->dram_emr1,	"DRAM emr1 : 0x%x\n", dram->dram_emr1);
-	pprintf(&dram->dram_emr2,	"DRAM emr2 : 0x%x\n", dram->dram_emr2);
-	pprintf(&dram->dram_emr3,	"DRAM emr3 : 0x%x\n", dram->dram_emr3);
+  for(i = 1; i <= 2; ++i) {
+    pprintf(&dram->dram_para[i-1],	"DRAM para%d : %08x\n", i, dram->dram_para[i-1]);
+  }
+  for(i = 0; i < 4; ++i) {
+    pprintf(&dram->dram_mr[i],	"DRAM mr%d : %08x\n", i, dram->dram_mr[i]);
+  }
+  for(i = 0; i < 14; ++i) {
+    pprintf(&dram->dram_tpr[i],	"DRAM tpr%d : %08x\n", i, dram->dram_tpr[i]);
+  }
 }
 
 void print_normal_gpio_cfg(normal_gpio_cfg *gpio, int count)
