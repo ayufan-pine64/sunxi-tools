@@ -138,6 +138,14 @@ typedef struct _boot_sdcard_info_t {
     __s32 speed_mode[4];
     __s32 line_sel[4];
     __s32 line_count[4];
+	__s32 				sdc_2xmode[4];
+	__s32 				sdc_ddrmode[4];
+	__s32 				sdc_f_max[4];
+	__s32				sdc_ex_dly_used[4];			//used config.fex delay
+	__s32				sdc_odly_25M[4];			//25MHz clk output delay
+	__s32				sdc_sdly_25M[4];			//25MHz clk sample delay
+	__s32				sdc_odly_50M[4];			//50MHz clk output delay
+	__s32				sdc_sdly_50M[4];			//50MHz clk sample delay
 } boot_sdcard_info_t;
 
 #define BROM_MAGIC                     "eGON.BRM"
@@ -231,6 +239,14 @@ void print_boot_sdcard_info(boot_sdcard_info_t *info)
 		pprintf(&info->speed_mode[i], "  Speed   : %d\n", info->speed_mode[i]);
 		pprintf(&info->line_sel[i],   "  Line sel: %d\n", info->line_sel[i]);
 		pprintf(&info->line_count[i], "  Line cnt: %d\n", info->line_count[i]);
+		pprintf(&info->sdc_2xmode[i],     "  sdc_2xmode: 0x%x\n", info->sdc_2xmode[i]);
+		pprintf(&info->sdc_ddrmode[i],    "  sdc_ddrmode: 0x%x\n", info->sdc_ddrmode[i]);
+		pprintf(&info->sdc_f_max[i],      "  sdc_f_max: 0x%x\n", info->sdc_f_max[i]);
+		pprintf(&info->sdc_ex_dly_used[i],"  sdc_ex_dly_used: 0x%x\n", info->sdc_ex_dly_used[i]);
+		pprintf(&info->sdc_odly_25M[i],   "  sdc_odly_25M: 0x%x\n", info->sdc_odly_25M[i]);
+		pprintf(&info->sdc_sdly_25M[i],   "  sdc_sdly_25M: 0x%x\n", info->sdc_sdly_25M[i]);
+		pprintf(&info->sdc_odly_50M[i],   "  sdc_odly_50M 0x%x\n", info->sdc_odly_50M[i]);
+		pprintf(&info->sdc_sdly_50M[i],   "  sdc_sdly_50M: 0x%x\n", info->sdc_sdly_50M[i]);
 	}
 }
 
